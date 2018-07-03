@@ -1,0 +1,17 @@
+apply plugin: 'java-library'
+
+version = '1.0.0'
+sourceCompatibility = '1.8'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+	implementation 'ch.vorburger.mariaDB4j:mariaDB4j:2.3.0'
+	implementation 'org.mariadb.jdbc:mariadb-java-client:2.2.5'
+	implementation 'commons-cli:commons-cli:1.4'
+	testImplementation 'commons-dbutils:commons-dbutils:1.7'
+    testImplementation 'junit:junit:4.12'
+	testImplementation 'org.slf4j:slf4j-simple:1.7.25'    
+}
