@@ -12,6 +12,8 @@ import java.util.regex.Matcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jeedsoft.marialocal.util.SystemUtil;
+
 import ch.vorburger.exec.ManagedProcessException;
 import ch.vorburger.mariadb4j.DB;
 import ch.vorburger.mariadb4j.DBConfigurationBuilder;
@@ -32,12 +34,23 @@ public class MariaLocalManager
 {
     private static final Logger logger = LoggerFactory.getLogger(MariaLocalManager.class);
     
-    private static final  Map<String, DBConfigurationBuilder> configMap = new HashMap<>();
+    private static final Map<String, DBConfigurationBuilder> configMap = new HashMap<>();
 
-    private static final  Map<String, DB> instanceMap = new HashMap<>();
+    private static final Map<String, DB> instanceMap = new HashMap<>();
 
-    private static final  Map<String, Set<String>> databaseMap = new HashMap<>();
+    private static final Map<String, Set<String>> databaseMap = new HashMap<>();
 
+    private static final Map<String, String> globalArgs = new HashMap<>();
+    
+    static
+    {
+        globalArgs.put("character-set-server", "utf8mb4");
+        globalArgs.put("collation-server", "utf8mb4_general_ci");
+        if (SystemUtil.isWindows()) {
+            globalArgs.put("lower_case_table_names", "2");
+        }
+    }
+    
     /**
      * Convert local-style URL (jdbc:marialocal:<file-path>) to remote-style
      * URL (jdbc:mysql://<server>:<port>/<database>). The MariaDB instance
@@ -58,9 +71,7 @@ public class MariaLocalManager
                 synchronized (configMap) {
                     if (!configMap.containsKey(instancePath)) { // double check
                         logger.info("Create local MariaDB instance: {}", instancePath);
-                        DBConfigurationBuilder config = DBConfigurationBuilder.newBuilder();
-                        config.setPort(0);
-                        config.setDataDir(instancePath);
+                        DBConfigurationBuilder config = config(0, instancePath);
                         DB db = DB.newEmbeddedDB(config.build());
                         db.start();
                         configMap.put(instancePath, config);
@@ -99,5 +110,31 @@ public class MariaLocalManager
                 logger.error("Failed to stop MariaDB4j instance: " + entry.getKey(), e);
             }
         }
+    }
+    
+    public static String getGlobalArg(String key)
+    {
+        return globalArgs.get(key);
+    }
+    
+    public static void setGlobalArg(String key, String value)
+    {
+        globalArgs.put(key, value);
+    }
+
+    public static String removeGlobalArg(String key)
+    {
+        return globalArgs.remove(key);
+    }
+    
+    static DBConfigurationBuilder config(int port, String dataDir)
+    {
+        DBConfigurationBuilder config = DBConfigurationBuilder.newBuilder();
+        config.setPort(0);
+        config.setDataDir(dataDir);
+        for (Map.Entry<String, String> entry: globalArgs.entrySet()) {
+            config.addArg("--" + entry.getKey() + "=" + entry.getValue());
+        }
+        return config;
     }
 }

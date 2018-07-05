@@ -31,9 +31,7 @@ public class MariaLocalStarter
         if (model == null) {
             return;
         }
-        DBConfigurationBuilder config = DBConfigurationBuilder.newBuilder();
-        config.setPort(model.port);
-        config.setDataDir(model.dataDir);
+        DBConfigurationBuilder config = MariaLocalManager.config(model.port, model.dataDir);
         DB db = DB.newEmbeddedDB(config.build());
         db.start();
         if (model.createDatabases != null) {
