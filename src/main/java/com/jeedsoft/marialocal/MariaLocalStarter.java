@@ -10,6 +10,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import com.jeedsoft.marialocal.util.StringUtil;
+
 import ch.vorburger.exec.ManagedProcessException;
 import ch.vorburger.mariadb4j.DB;
 import ch.vorburger.mariadb4j.DBConfigurationBuilder;
@@ -30,6 +32,11 @@ public class MariaLocalStarter
         Model model = parse(args);
         if (model == null) {
             return;
+        }
+        System.out.println("port: " + model.port);
+        System.out.println("dataDir: " + model.dataDir);
+        if (model.createDatabases != null) {
+            System.out.println("createDatabases: " + StringUtil.join(model.createDatabases));
         }
         DBConfigurationBuilder config = MariaLocalManager.config(model.port, model.dataDir);
         DB db = DB.newEmbeddedDB(config.build());

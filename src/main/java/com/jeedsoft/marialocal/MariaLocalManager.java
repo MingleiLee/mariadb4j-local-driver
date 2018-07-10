@@ -130,7 +130,7 @@ public class MariaLocalManager
     static DBConfigurationBuilder config(int port, String dataDir)
     {
         DBConfigurationBuilder config = DBConfigurationBuilder.newBuilder();
-        config.setPort(0);
+        config.setPort(port);
         config.setDataDir(dataDir);
         for (Map.Entry<String, String> entry: globalArgs.entrySet()) {
             config.addArg("--" + entry.getKey() + "=" + entry.getValue());
