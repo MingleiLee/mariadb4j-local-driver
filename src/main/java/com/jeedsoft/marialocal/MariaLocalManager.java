@@ -93,7 +93,7 @@ public class MariaLocalManager
             return configMap.get(instancePath).getURL(dbName);
         }
         catch (Exception e) {
-            throw new SQLException("");
+            throw new SQLException("Failed to get remote URL", e);
         }
     }
     
@@ -132,6 +132,9 @@ public class MariaLocalManager
         DBConfigurationBuilder config = DBConfigurationBuilder.newBuilder();
         config.setPort(port);
         config.setDataDir(dataDir);
+        if (SystemUtil.isLinux() && "root".equals(System.getProperty("user.name"))) {
+            config.addArg("--user=root"); // this argument is required if current user is root
+        }
         for (Map.Entry<String, String> entry: globalArgs.entrySet()) {
             config.addArg("--" + entry.getKey() + "=" + entry.getValue());
         }
